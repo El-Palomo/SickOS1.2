@@ -31,7 +31,7 @@ Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 ```
 
 
-## 2. Enumeración de servicios.
+## Enumeración de servicios.
 
 - Sólo encontramos una carpeta llamada /test/
 ```
@@ -56,10 +56,48 @@ by OJ Reeves (@TheColonial) & Christian Mehlmauer (@_FireFart_)
 ===============================================================
 ```
 
+<img src="https://github.com/El-Palomo/SickOS1.2/blob/main/sickos1.jpg" width="80%"></img>
 
+- Descargué la imagen y busque cadenas importantes. Sin éxito.
+- Probé credenciales básicas sobre SSH. Sin éxito.
+- Busqué carpetas y archivos con un listado más grande. Sin éxito.
+- La búsqueda con NIKTO no arrojaba nada importante: archivo robot.txt, comentarios en html.
+- Lo único que se tiene es la carpeta /test/.
 
+## Identificando Vulnerabilidad
 
+1. Si revisamos con calma identificamos que los métodos soportados en la carpeta /test es diferente al de la carpeta raiz.
+Moraleja: Se debe buscar los métodos en cada carpeta
 
+```
+root@kali:~/SICKOS# nmap -n -P0 -p 80 --script http-methods.nse 192.168.78.142
+Host discovery disabled (-Pn). All addresses will be marked 'up' and scan times will be slower.
+Starting Nmap 7.91 ( https://nmap.org ) at 2021-02-28 18:54 EST
+Nmap scan report for 192.168.78.142
+Host is up (0.00026s latency).
+
+PORT   STATE SERVICE
+80/tcp open  http
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+MAC Address: 00:0C:29:E5:F7:14 (VMware)
+
+Nmap done: 1 IP address (1 host up) scanned in 15.44 seconds
+root@kali:~/SICKOS# nmap -n -P0 -p 80 --script http-methods.nse --script-args http-methods.url-path='/test' 192.168.78.142
+Host discovery disabled (-Pn). All addresses will be marked 'up' and scan times will be slower.
+Starting Nmap 7.91 ( https://nmap.org ) at 2021-02-28 18:55 EST
+Nmap scan report for 192.168.78.142
+Host is up (0.00031s latency).
+
+PORT   STATE SERVICE
+80/tcp open  http
+| http-methods: 
+|   Supported Methods: PROPFIND DELETE MKCOL PUT MOVE COPY PROPPATCH LOCK UNLOCK GET HEAD POST OPTIONS
+|   Potentially risky methods: PROPFIND DELETE MKCOL PUT MOVE COPY PROPPATCH LOCK UNLOCK
+|_  Path tested: /test
+MAC Address: 00:0C:29:E5:F7:14 (VMware)
+```
+<img src="https://github.com/El-Palomo/SickOS1.2/blob/main/sickos2.jpg" width="80%"></img>
 
 
 
